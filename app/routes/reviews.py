@@ -1,8 +1,12 @@
+import logging
 from fastapi import APIRouter, HTTPException, Path
 from typing import Dict, Any, List
 
 from ..models import ReviewsResponse, ReviewModel
 from ..services.google_sheets import google_sheets_service
+
+# Create logger for this module
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["reviews"])
 
@@ -66,7 +70,7 @@ async def get_reviews(
                 review = ReviewModel(**review_dict)
                 reviews.append(review)
             except Exception as e:
-                print(f"⚠️ Skipping invalid review: {e}")
+                logger.warning(f"Skipping invalid review: {e}")
                 continue
         
         # Calculate statistics
@@ -83,7 +87,7 @@ async def get_reviews(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Error in get_reviews endpoint: {str(e)}")
+        logger.error(f"Error in get_reviews endpoint: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

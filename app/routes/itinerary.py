@@ -1,8 +1,12 @@
+import logging
 from fastapi import APIRouter, HTTPException, Path
 from typing import Dict, Any, List
 
 from ..services.google_sheets import google_sheets_service
 from ..models import ItineraryResponse, ItineraryDayModel
+
+# Create logger for this module
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["itinerary"])
 
@@ -56,7 +60,7 @@ async def get_itinerary(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Error in get_itinerary endpoint: {str(e)}")
+        logger.error(f"Error in get_itinerary endpoint: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

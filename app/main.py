@@ -1,3 +1,5 @@
+import logging
+import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -5,6 +7,18 @@ from datetime import datetime
 from .config import settings
 from .models import HealthCheck
 from .routes import reviews, images, itinerary
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Create logger for main module
+logger = logging.getLogger(__name__)
 
 # Create FastAPI application
 app = FastAPI(

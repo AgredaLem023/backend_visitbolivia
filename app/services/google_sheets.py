@@ -1,6 +1,6 @@
-import os
 import json
 import re
+import logging
 from typing import List, Dict, Any
 from google.auth.transport.requests import Request
 from google.oauth2.service_account import Credentials
@@ -9,6 +9,9 @@ from googleapiclient.errors import HttpError
 
 from ..config import settings
 from ..models import ReviewModel
+
+# Create logger for this module
+logger = logging.getLogger(__name__)
 
 
 def convert_google_drive_url(url: str) -> str:
@@ -27,10 +30,10 @@ def convert_google_drive_url(url: str) -> str:
         file_id = match.group(1)
         # Convert to direct image URL using usercontent domain (no redirects)
         direct_url = f"https://drive.usercontent.google.com/download?id={file_id}&export=view&authuser=0"
-        print(f"📸 Converted Drive URL: {url} -> {direct_url}")
+        logger.info(f"Converted Google Drive URL: {url} -> {direct_url}")
         return direct_url
     
-    print(f"⚠️ Could not convert Drive URL: {url}")
+    logger.warning(f"Could not convert Google Drive URL: {url}")
     return url
 
 
@@ -42,26 +45,25 @@ class GoogleSheetsService:
         self.service = None
         
     def authenticate(self):
-        """Authenticate with Google Sheets API using service account"""
+        """Authenticate with Google Sheets API using service account JSON"""
         try:
             # Define the scope
             SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
             
-            # Load credentials from service account file
-            credentials_path = settings.google_sheets_credentials_path
-            if not os.path.exists(credentials_path):
-                raise FileNotFoundError(f"Credentials file not found: {credentials_path}")
+            # Get credentials dictionary from settings
+            credentials_dict = settings.get_google_credentials_dict()
             
-            self.credentials = Credentials.from_service_account_file(
-                credentials_path, scopes=SCOPES
+            # Create credentials from dictionary instead of file
+            self.credentials = Credentials.from_service_account_info(
+                credentials_dict, scopes=SCOPES
             )
             
             # Build the service
             self.service = build('sheets', 'v4', credentials=self.credentials)
-            print("✅ Google Sheets authentication successful")
+            logger.info("Google Sheets authentication successful")
             
         except Exception as e:
-            print(f"❌ Google Sheets authentication failed: {str(e)}")
+            logger.error(f"Google Sheets authentication failed: {str(e)}")
             raise e
     
     def get_sheet_data(self, spreadsheet_id: str, worksheet_name: str, range_name: str = None) -> List[List[str]]:
@@ -81,14 +83,14 @@ class GoogleSheetsService:
             ).execute()
             
             values = result.get('values', [])
-            print(f"✅ Retrieved {len(values)} rows from {worksheet_name}")
+            logger.info(f"Retrieved {len(values)} rows from {worksheet_name}")
             return values
             
         except HttpError as error:
-            print(f"❌ HTTP Error retrieving data from {worksheet_name}: {error}")
+            logger.error(f"HTTP Error retrieving data from {worksheet_name}: {error}")
             raise error
         except Exception as error:
-            print(f"❌ Error retrieving data from {worksheet_name}: {error}")
+            logger.error(f"Error retrieving data from {worksheet_name}: {error}")
             raise error
     
     def get_reviews_by_package(self, package_id: str) -> List[Dict[str, Any]]:
@@ -104,15 +106,15 @@ class GoogleSheetsService:
             data = self.get_sheet_data(spreadsheet_id, worksheet_name)
             
             if not data:
-                print(f"⚠️ No data found in {worksheet_name} for package {package_id}")
+                logger.warning(f"No data found in {worksheet_name} for package {package_id}")
                 return []
             
             # Skip header row and process data
             headers = data[0] if data else []
             rows = data[1:] if len(data) > 1 else []
             
-            print(f"📊 Headers found: {headers}")
-            print(f"📊 Processing {len(rows)} review rows")
+            logger.info(f"Headers found: {headers}")
+            logger.info(f"Processing {len(rows)} review rows")
             
             reviews = []
             for i, row in enumerate(rows, start=2):  # start=2 because row 1 is headers
@@ -131,14 +133,14 @@ class GoogleSheetsService:
                     reviews.append(review)
                     
                 except (ValueError, IndexError) as e:
-                    print(f"⚠️ Skipping row {i} due to error: {e}")
+                    logger.warning(f"Skipping review row {i} due to error: {e}")
                     continue
             
-            print(f"✅ Successfully processed {len(reviews)} reviews for {package_id}")
+            logger.info(f"Successfully processed {len(reviews)} reviews for {package_id}")
             return reviews
             
         except Exception as e:
-            print(f"❌ Error getting reviews for {package_id}: {str(e)}")
+            logger.error(f"Error getting reviews for {package_id}: {str(e)}")
             raise e
     
     def get_images_by_package(self, package_id: str) -> List[Dict[str, Any]]:
@@ -152,15 +154,15 @@ class GoogleSheetsService:
             data = self.get_sheet_data(spreadsheet_id, worksheet_name)
             
             if not data or len(data) < 2:
-                print(f"⚠️ No image data found in {worksheet_name} for package {package_id}")
+                logger.warning(f"No image data found in {worksheet_name} for package {package_id}")
                 return []
             
             # Process images data (columns: id, url, category, alt_text)
             headers = data[0] if data else []
             rows = data[1:] if len(data) > 1 else []
             
-            print(f"📊 Image headers found: {headers}")
-            print(f"📊 Processing {len(rows)} image rows")
+            logger.info(f"Image headers found: {headers}")
+            logger.info(f"Processing {len(rows)} image rows")
             
             images = []
             for i, row in enumerate(rows, start=2):
@@ -182,20 +184,20 @@ class GoogleSheetsService:
                     
                     # Skip rows with empty URLs
                     if not image['url']:
-                        print(f"⚠️ Skipping row {i} - empty URL")
+                        logger.warning(f"Skipping image row {i} - empty URL")
                         continue
                         
                     images.append(image)
                     
                 except (ValueError, IndexError) as e:
-                    print(f"⚠️ Skipping image row {i} due to error: {e}")
+                    logger.warning(f"Skipping image row {i} due to error: {e}")
                     continue
             
-            print(f"✅ Successfully processed {len(images)} images for {package_id}")
+            logger.info(f"Successfully processed {len(images)} images for {package_id}")
             return images
             
         except Exception as e:
-            print(f"❌ Error getting images for {package_id}: {str(e)}")
+            logger.error(f"Error getting images for {package_id}: {str(e)}")
             raise e
     
     def get_itinerary_by_package(self, package_id: str) -> List[Dict[str, Any]]:
@@ -209,7 +211,7 @@ class GoogleSheetsService:
             data = self.get_sheet_data(spreadsheet_id, worksheet_name)
             
             if not data or len(data) < 2:
-                print(f"⚠️ No itinerary data found in {worksheet_name} for package {package_id}")
+                logger.warning(f"No itinerary data found in {worksheet_name} for package {package_id}")
                 return []
             
             # Process itinerary data 
@@ -217,8 +219,8 @@ class GoogleSheetsService:
             headers = data[0] if data else []
             rows = data[1:] if len(data) > 1 else []
             
-            print(f"📊 Itinerary headers found: {headers}")
-            print(f"📊 Processing {len(rows)} itinerary day rows")
+            logger.info(f"Itinerary headers found: {headers}")
+            logger.info(f"Processing {len(rows)} itinerary day rows")
             
             itinerary_days = []
             for i, row in enumerate(rows, start=2):
@@ -245,14 +247,14 @@ class GoogleSheetsService:
                     itinerary_days.append(itinerary_day)
                     
                 except (ValueError, IndexError) as e:
-                    print(f"⚠️ Skipping itinerary day row {i} due to error: {e}")
+                    logger.warning(f"Skipping itinerary day row {i} due to error: {e}")
                     continue
             
-            print(f"✅ Successfully processed {len(itinerary_days)} itinerary days for {package_id}")
+            logger.info(f"Successfully processed {len(itinerary_days)} itinerary days for {package_id}")
             return itinerary_days
             
         except Exception as e:
-            print(f"❌ Error getting itinerary for {package_id}: {str(e)}")
+            logger.error(f"Error getting itinerary for {package_id}: {str(e)}")
             raise e
 
 

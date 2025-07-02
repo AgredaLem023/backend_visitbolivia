@@ -1,11 +1,12 @@
 import os
+import json
 from typing import List, Dict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Google Sheets Configuration - Multiple spreadsheets (one per package)
-    google_sheets_credentials_path: str = "credentials/service-account-key.json"
+    # Google Sheets Configuration - JSON credentials instead of file path
+    google_credentials_json: str = ""
     
     # Spreadsheet IDs for each trip package
     google_sheets_4days_id: str = ""
@@ -18,9 +19,9 @@ class Settings(BaseSettings):
     images_worksheet_name: str = "images_data"
     itinerary_worksheet_name: str = "itinerary_data"
     
-    # API Configuration
+    # API Configuration - Dynamic PORT for cloud deployment
     api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    api_port: int = int(os.environ.get("PORT", 8000))  # Render provides PORT env var
     api_reload: bool = True
     
     # CORS Configuration
@@ -46,7 +47,7 @@ class Settings(BaseSettings):
             self.local_frontend_url,
         ]
         
-        # Add localhost variations for development
+        # Add localhost variations for development only
         if self.environment == "development":
             origins.extend([
                 "http://localhost:3000",
@@ -67,6 +68,21 @@ class Settings(BaseSettings):
             "25days": self.google_sheets_25days_id,
         }
         return spreadsheet_mapping.get(package_id, "")
+    
+    def get_google_credentials_dict(self) -> Dict:
+        """Parse Google credentials JSON string and return as dictionary"""
+        try:
+            if not self.google_credentials_json:
+                raise ValueError("Google credentials JSON not provided")
+            
+            # Parse JSON string to dictionary
+            credentials_dict = json.loads(self.google_credentials_json)
+            return credentials_dict
+            
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON format in google_credentials_json: {str(e)}")
+        except Exception as e:
+            raise ValueError(f"Error parsing Google credentials: {str(e)}")
 
     class Config:
         env_file = ".env"

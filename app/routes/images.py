@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException, Path
 from fastapi.responses import Response
 import httpx
@@ -5,6 +6,9 @@ from typing import Dict, Any, List
 
 from ..models import ImagesResponse, ImageModel
 from ..services.google_sheets import google_sheets_service
+
+# Create logger for this module
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["images"])
 
@@ -41,7 +45,7 @@ async def get_images(
                 image = ImageModel(**image_dict)
                 images.append(image)
             except Exception as e:
-                print(f"⚠️ Skipping invalid image: {e}")
+                logger.warning(f"Skipping invalid image: {e}")
                 continue
         
         return ImagesResponse(
@@ -53,7 +57,7 @@ async def get_images(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Error in get_images endpoint: {str(e)}")
+        logger.error(f"Error in get_images endpoint: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"
@@ -99,7 +103,7 @@ async def proxy_image(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Error proxying image: {str(e)}")
+        logger.error(f"Error proxying image: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to proxy image")
 
 
@@ -131,7 +135,7 @@ async def get_images_by_category(
                 image = ImageModel(**image_dict)
                 filtered_images.append(image)
             except Exception as e:
-                print(f"⚠️ Skipping invalid image: {e}")
+                logger.warning(f"Skipping invalid image: {e}")
                 continue
         
         return {
