@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     frontend_15days_url: str = "https://15-dias.visitbolivia.travel"
     frontend_25days_url: str = "https://25-dias.visitbolivia.travel"
     local_frontend_url: str = "http://localhost:3000"
+    local_frontend_url_2: str = "http://localhost:3001"
     
     # Environment
     environment: str = "development"
@@ -45,6 +46,7 @@ class Settings(BaseSettings):
             self.frontend_15days_url,
             self.frontend_25days_url,
             self.local_frontend_url,
+            self.local_frontend_url_2,
         ]
         
         # Add localhost variations for development only
