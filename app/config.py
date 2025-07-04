@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     api_reload: bool = True
     
     # CORS Configuration
-    frontend_4days_url: str = "https://4dias.visitbolivia.travel" #
+    frontend_4days_url: str = "https://4dias.visitbolivia.travel/pe_es" #
     frontend_4days_url_2: str = "https://prueba-paquete.visitbolivia.travel"
     frontend_11days_url: str = "https://11dias.visitbolivia.travel"
     frontend_15days_url: str = "https://15dias.visitbolivia.travel"
