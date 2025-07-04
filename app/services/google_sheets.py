@@ -200,14 +200,19 @@ class GoogleSheetsService:
             logger.error(f"Error getting images for {package_id}: {str(e)}")
             raise e
     
-    def get_itinerary_by_package(self, package_id: str) -> List[Dict[str, Any]]:
-        """Get itinerary data for a specific trip package"""
+    def get_itinerary_by_package(self, package_id: str, lang: str = "es") -> List[Dict[str, Any]]:
+        """Get itinerary data for a specific trip package in the specified language"""
         try:
             spreadsheet_id = settings.get_spreadsheet_id(package_id)
             if not spreadsheet_id:
                 raise ValueError(f"No spreadsheet ID configured for package: {package_id}")
             
-            worksheet_name = settings.itinerary_worksheet_name  # "itinerary_data"
+            # Determine worksheet name based on language
+            if lang == "en":
+                worksheet_name = settings.itinerary_worksheet_name + "_en"  # "itinerary_data_en"
+            else:
+                worksheet_name = settings.itinerary_worksheet_name  # "itinerary_data" (default Spanish)
+            
             data = self.get_sheet_data(spreadsheet_id, worksheet_name)
             
             if not data or len(data) < 2:
@@ -220,7 +225,8 @@ class GoogleSheetsService:
             rows = data[1:] if len(data) > 1 else []
             
             logger.info(f"Itinerary headers found: {headers}")
-            logger.info(f"Processing {len(rows)} itinerary day rows")
+            logger.info(f"Processing {len(rows)} itinerary day rows from worksheet: {worksheet_name}")
+            logger.info(f"Language: {lang}")
             
             itinerary_days = []
             for i, row in enumerate(rows, start=2):
@@ -250,7 +256,7 @@ class GoogleSheetsService:
                     logger.warning(f"Skipping itinerary day row {i} due to error: {e}")
                     continue
             
-            logger.info(f"Successfully processed {len(itinerary_days)} itinerary days for {package_id}")
+            logger.info(f"Successfully processed {len(itinerary_days)} itinerary days for {package_id} in {lang}")
             return itinerary_days
             
         except Exception as e:

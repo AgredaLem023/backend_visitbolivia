@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Query
 from typing import Dict, Any, List
 
 from ..services.google_sheets import google_sheets_service
@@ -13,16 +13,21 @@ router = APIRouter(prefix="/api", tags=["itinerary"])
 
 @router.get("/itinerary/{package_id}", response_model=ItineraryResponse)
 async def get_itinerary(
-    package_id: str = Path(..., description="Trip package ID (e.g., '4days', '11days')")
+    package_id: str = Path(..., description="Trip package ID (e.g., '4days', '11days')"),
+    lang: str = Query("es", description="Language code (es for Spanish, en for English)")
 ) -> ItineraryResponse:
     """
-    Get itinerary data for a specific trip package
+    Get itinerary data for a specific trip package in the specified language
     
     Package IDs:
     - 4days: 4-day trip package
     - 11days: 11-day trip package
     - 15days: 15-day trip package
     - 25days: 25-day trip package
+    
+    Languages:
+    - es: Spanish (default) - fetches from 'itinerary_data' worksheet
+    - en: English - fetches from 'itinerary_data_en' worksheet
     """
     try:
         # Validate package ID
@@ -33,8 +38,16 @@ async def get_itinerary(
                 detail=f"Invalid package_id. Must be one of: {', '.join(valid_packages)}"
             )
         
-        # Get itinerary data from Google Sheets
-        itinerary_data = google_sheets_service.get_itinerary_by_package(package_id)
+        # Validate language
+        valid_languages = ["es", "en"]
+        if lang not in valid_languages:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid language. Must be one of: {', '.join(valid_languages)}"
+            )
+        
+        # Get itinerary data from Google Sheets with language parameter
+        itinerary_data = google_sheets_service.get_itinerary_by_package(package_id, lang)
         
         # Convert to Pydantic models
         itinerary_days = []
@@ -70,15 +83,23 @@ async def get_itinerary(
 @router.get("/itinerary/{package_id}/day/{day_number}")
 async def get_itinerary_day(
     package_id: str = Path(..., description="Trip package ID"),
-    day_number: int = Path(..., description="Day number (1-based)")
+    day_number: int = Path(..., description="Day number (1-based)"),
+    lang: str = Query("es", description="Language code (es for Spanish, en for English)")
 ) -> Dict[str, Any]:
-    """Get itinerary data for a specific day of a specific package"""
+    """Get itinerary data for a specific day of a specific package in the specified language"""
     try:
         valid_packages = ["4days", "11days", "15days", "25days"]
         if package_id not in valid_packages:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid package_id. Must be one of: {', '.join(valid_packages)}"
+            )
+        
+        valid_languages = ["es", "en"]
+        if lang not in valid_languages:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid language. Must be one of: {', '.join(valid_languages)}"
             )
         
         if day_number < 1:
@@ -88,7 +109,7 @@ async def get_itinerary_day(
             )
         
         # Get all itinerary data then filter for specific day
-        all_itinerary = google_sheets_service.get_itinerary_by_package(package_id)
+        all_itinerary = google_sheets_service.get_itinerary_by_package(package_id, lang)
         
         # Find the specific day
         day_data = None
@@ -105,7 +126,8 @@ async def get_itinerary_day(
         
         return {
             "package_id": package_id,
-            "day_data": day_data
+            "day_data": day_data,
+            "language": lang
         }
         
     except HTTPException:
