@@ -157,7 +157,7 @@ class GoogleSheetsService:
                 logger.warning(f"No image data found in {worksheet_name} for package {package_id}")
                 return []
             
-            # Process images data (columns: id, url, category, alt_text)
+            # Process images data (columns: id, url, category, alt_text, alt_text_en)
             headers = data[0] if data else []
             rows = data[1:] if len(data) > 1 else []
             
@@ -167,8 +167,8 @@ class GoogleSheetsService:
             images = []
             for i, row in enumerate(rows, start=2):
                 try:
-                    # Ensure row has enough columns
-                    while len(row) < 4:
+                    # Ensure row has enough columns (now expecting 5 columns)
+                    while len(row) < 5:
                         row.append("")
                     
                     # Convert Google Drive URLs to direct image URLs
@@ -179,7 +179,8 @@ class GoogleSheetsService:
                         'id': int(row[0]) if row[0] and str(row[0]).isdigit() else i,
                         'url': converted_url,
                         'category': row[2] if row[2] else "general",
-                        'alt_text': row[3] if row[3] else f"Image {i}"
+                        'alt_text': row[3] if row[3] else f"Image {i}",
+                        'alt_text_en': row[4] if row[4] else f"Image {i}"
                     }
                     
                     # Skip rows with empty URLs

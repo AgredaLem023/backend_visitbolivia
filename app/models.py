@@ -26,6 +26,7 @@ class ImageModel(BaseModel):
     url: str
     category: str
     alt_text: str
+    alt_text_en: str
 
 
 class ImagesResponse(BaseModel):
