@@ -1,3 +1,21 @@
+"""
+Visit Bolivia Backend - Configuration Management
+===============================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+
+Copyright © [YEAR] Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+Configuration management using Pydantic settings for environment variables,
+Google Sheets configuration, and CORS origins for multi-package support.
+"""
+
 import os
 import json
 from typing import List, Dict

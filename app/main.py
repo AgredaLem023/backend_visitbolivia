@@ -1,3 +1,22 @@
+"""
+Visit Bolivia Backend - Main Application
+========================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+Framework: FastAPI with Google Sheets Integration
+
+Copyright © 2025 Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+Main FastAPI application for managing Bolivia travel packages through Google Sheets integration.
+Provides RESTful API endpoints for reviews, images, and itinerary management.
+"""
+
 import logging
 import sys
 import os

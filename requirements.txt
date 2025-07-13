@@ -1,3 +1,20 @@
+# ================================================================================
+# Visit Bolivia Backend - Python Dependencies
+# ================================================================================
+# 
+# Author: Sergio Agreda (sergioagreda21@outlook.com)
+# GitHub: @AgredaLem023
+# Project: Visit Bolivia - Travel Package Management Backend
+# Framework: FastAPI with Google Sheets Integration
+# 
+# Copyright © 2025 Sergio Agreda. All rights reserved.
+# This code is proprietary and confidential.
+# 
+# Originally developed by Sergio Agreda for Visit Bolivia business operations.
+# Transferred from personal to business accounts while maintaining authorship.
+# 
+# ================================================================================
+
 annotated-types==0.7.0
 anyio==4.9.0
 cachetools==5.5.2

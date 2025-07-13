@@ -1,3 +1,21 @@
+"""
+Visit Bolivia Backend - Reviews API Routes
+==========================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+
+Copyright © [YEAR] Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+FastAPI routes for managing customer reviews and ratings for Bolivia travel packages.
+Provides endpoints for retrieving reviews, calculating statistics, and managing feedback.
+"""
+
 import logging
 from fastapi import APIRouter, HTTPException, Path
 from typing import Dict, Any, List

@@ -1,3 +1,21 @@
+"""
+Visit Bolivia Backend - Itinerary API Routes
+============================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+
+Copyright © [YEAR] Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+FastAPI routes for managing travel package itineraries including day-by-day
+schedules, activities, and multi-language support for Bolivia travel packages.
+"""
+
 import logging
 from fastapi import APIRouter, HTTPException, Path, Query
 from typing import Dict, Any, List

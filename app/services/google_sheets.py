@@ -1,3 +1,22 @@
+"""
+Visit Bolivia Backend - Google Sheets Service
+============================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+
+Copyright © [YEAR] Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+Core service for Google Sheets API integration, providing data retrieval and processing
+for travel package reviews, images, and itinerary management. Handles authentication,
+URL conversion, and multi-language support for the Bolivia travel package system.
+"""
+
 import json
 import re
 import logging

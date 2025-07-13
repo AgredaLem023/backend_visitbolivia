@@ -139,3 +139,5 @@ render.yaml
 # Local development files
 local_settings.py
 dev_settings.py 
+
+STARTER_GUIDE.md

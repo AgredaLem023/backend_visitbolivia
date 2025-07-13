@@ -1,3 +1,21 @@
+"""
+Visit Bolivia Backend - Data Models
+===================================
+
+Author: Sergio Agreda (sergioagreda21@outlook.com)
+GitHub: @AgredaLem023
+Project: Visit Bolivia - Travel Package Management Backend
+
+Copyright © [YEAR] Sergio Agreda. All rights reserved.
+This code is proprietary and confidential.
+
+Originally developed by Sergio Agreda for Visit Bolivia business operations.
+
+Description:
+Pydantic data models for API request/response validation including reviews,
+images, itinerary, and health check models for the travel package system.
+"""
+
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
